@@ -1,14 +1,22 @@
-import json 
-import re 
+import json
 import streamlit as st
+import pandas as pd
+from pytz import timezone
+from datetime import datetime
 
-current_season = 's33'
+# Load JSON data
+with open("response.json", "r") as file:
+    data = json.load(file)
 
-with open(r'C:\Users\alejandro_castano1\Documents\FN\json_templating\response.json', 'r') as file:
-    content = file.read()
-    data = json.loads(content)
+# Filter tournaments for s33 season
+current_season = "s33"
+excluded_events = ["PerformanceEvaluation", "FNCSMajor1"]
 
-filtered_events = [elem for elem in data if current_season in elem['eventId'].lower()]
+filtered_events = [
+    event for event in data
+    if current_season in event['eventId'].lower()
+    and not any(excluded in event['eventId'] for excluded in excluded_events)
+]
 
 grouped_events = {}
 for event in filtered_events:
