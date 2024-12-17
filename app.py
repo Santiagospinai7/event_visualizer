@@ -1,8 +1,8 @@
 import json
 import streamlit as st
-import pandas as pd
-from pytz import timezone
-from datetime import datetime
+# import pandas as pd
+# from pytz import timezone
+# from datetime import datetime
 
 # Load JSON data
 with open("response.json", "r") as file:
@@ -17,6 +17,10 @@ filtered_events = [
     if current_season in event['eventId'].lower()
     and not any(excluded in event['eventId'] for excluded in excluded_events)
 ]
+
+# generate a JSON with the filtered events data
+with open("filtered_events.json", "w") as file:
+    json.dump(filtered_events, file)
 
 grouped_events = {}
 for event in filtered_events:
