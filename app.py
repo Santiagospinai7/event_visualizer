@@ -23,22 +23,18 @@ filtered_events = filter_events(data)
 # Render navbar
 render_navbar()
 
-# Estado de Región Time
+# Region Time Toggle
 if "region_time" not in st.session_state:
     st.session_state["region_time"] = False
 
-# Selector de Torneos
 selected_tournament = render_tournament_selector(filtered_events)
 
-# Botones Toggle
 show_region_time = render_toggle_buttons()
 
-# Filtrar eventos para el torneo seleccionado
 selected_events = [event for event in filtered_events if selected_tournament in event["eventId"]]
 
-# Mostrar eventos
+# Display Events
 if selected_tournament != "Choose Tournament":
-    # st.markdown(f"<h4 style='text-align:center'>Tournament: {selected_tournament}</h4>", unsafe_allow_html=True)
     render_events(selected_events, show_region_time)
 else:
     st.markdown("<p style='text-align:center'>No Tournament Selected</p>", unsafe_allow_html=True)

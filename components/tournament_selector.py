@@ -6,7 +6,6 @@ def render_tournament_selector(filtered_events):
     tournament_names = list(set(re.sub(r"epicgames_S33_", "", event["eventId"]).rsplit("_", 1)[0]
                                 for event in filtered_events))
 
-    # CSS para el contenedor combinado
     st.markdown("""
         <style>
             .filter-container {
@@ -52,7 +51,6 @@ def render_tournament_selector(filtered_events):
         </style>
     """, unsafe_allow_html=True)
 
-    # Contenedor combinado
     st.markdown("""
         
         <div style="text-align: center;">
@@ -62,12 +60,10 @@ def render_tournament_selector(filtered_events):
     """.format(
         ), unsafe_allow_html=True)
 
-    # Actualizar estado usando query params
     query_params = st.query_params
     if "region_time" in query_params:
         st.session_state["region_time"] = not query_params["region_time"] == "false"
 
-    # Mostrar el torneo seleccionado y el modo de tiempo
     selected_tournament = st.selectbox("", ["Choose Tournament"] + tournament_names, index=0)
 
     return selected_tournament
