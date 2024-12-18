@@ -38,7 +38,7 @@ selected_events = [event for event in filtered_events if selected_tournament in 
 
 # Mostrar eventos
 if selected_tournament != "Choose Tournament":
-    st.markdown(f"<h4 style='text-align:center'>Tournament: {selected_tournament}</h4>", unsafe_allow_html=True)
+    # st.markdown(f"<h4 style='text-align:center'>Tournament: {selected_tournament}</h4>", unsafe_allow_html=True)
     render_events(selected_events, show_region_time)
 else:
     st.markdown("<p style='text-align:center'>No Tournament Selected</p>", unsafe_allow_html=True)
