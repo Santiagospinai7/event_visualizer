@@ -15,5 +15,8 @@ def hide_streamlit_menu():
             padding: 0 !important;
             gap: 0 !important;
         }
+        .st-emotion-cache-yw8pof {
+            padding: 0 !important;
+        }
     </style>
 """, unsafe_allow_html=True)

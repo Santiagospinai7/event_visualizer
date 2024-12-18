@@ -1,7 +1,8 @@
 import streamlit as st
+from streamlit.components.v1 import html
 from utils.time_utils import convert_time_to_region
 
-# Función para parsear el evento
+# Function to parse event details
 def parse_event_id(event_id):
     parts = event_id.split("_")
     return {
@@ -11,59 +12,66 @@ def parse_event_id(event_id):
         "region": parts[-1],
     }
 
-# Función principal para mostrar cartas de eventos
+# Main function to render events
 def render_events(selected_events, show_region_time):
-    region_list = ["ASIA", "BR", "EU", "ME", "NAC", "NAW", "OCE"]
+    regions = ["ASIA", "BR", "EU", "ME", "NAC", "NAW", "OCE"]
     events_by_region = {}
+
+    # Organize events by region
     for event in selected_events:
         for region in event.get("regions", []):
             if region not in events_by_region:
                 events_by_region[region] = []
             events_by_region[region].extend(event.get("eventWindows", []))
 
-    # Mostrar contenedor
-    st.markdown("<div class='container'><div class='row'>", unsafe_allow_html=True)
+    # First Row: 3 Regions
+    cols = st.columns(3)
+    for i, region in enumerate(["ASIA", "BR", "EU"]):
+        with cols[i]:
+            render_region_card(region, events_by_region, show_region_time)
 
-    for region in region_list:
-        st.markdown("<div class='col-md-4 mb-4'>", unsafe_allow_html=True)
-        st.markdown(f"<h5 class='text-center'>{region}</h5>", unsafe_allow_html=True)
+    # Second Row: 3 Regions
+    cols = st.columns(3)
+    for i, region in enumerate(["ME", "NAC", "NAW"]):
+        with cols[i]:
+            render_region_card(region, events_by_region, show_region_time)
 
-        # Verificar si hay eventos para la región
-        if region in events_by_region and events_by_region[region]:
-            for window in events_by_region[region]:
-                begin_time = window.get('beginTime', None)
-                end_time = window.get('endTime', None)
+    # Third Row: 1 Region centered
+    col = st.columns([1, 2, 1])[1]
+    with col:
+        render_region_card("OCE", events_by_region, show_region_time)
 
-                parsed_event = parse_event_id(window["eventWindowId"])
-                round_name = parsed_event["event_window"]
+# Function to render a region card
+def render_region_card(region, events_by_region, show_region_time):
+    # Card Layout
+    st.markdown(f"### 🌍 {region}")
 
-                # Convertir a tiempo de región o mantener UTC
-                start_time = convert_time_to_region(begin_time, region) if show_region_time else begin_time
-                end_time = convert_time_to_region(end_time, region) if show_region_time else end_time
+    # Scrollable events container with fixed height using components.html
+    if region in events_by_region and events_by_region[region]:
+        events_html = ""
+        for window in events_by_region[region]:
+            parsed_event = parse_event_id(window["eventWindowId"])
+            round_name = parsed_event["event_window"]
+            begin_time = window.get("beginTime", "N/A")
+            end_time = window.get("EndTime", "N/A")
+            
+            # Convert times
+            start_time = convert_time_to_region(begin_time, region) if show_region_time else begin_time
+            end_time = convert_time_to_region(end_time, region) if show_region_time else end_time
 
-                # Mostrar tarjeta
-                st.markdown(f"""
-                    <div class="card bg-dark text-white">
-                        <div class="card-body text-center">
-                            <h6 class="card-title">{round_name}</h6>
-                            <p class="card-text">
-                                <strong>Start:</strong> {start_time}<br>
-                                <strong>End:</strong> {end_time}
-                            </p>
-                        </div>
-                    </div>
-                """, unsafe_allow_html=True)
-        else:
-            # Mostrar mensaje si no hay eventos
-            st.markdown("""
-                <div class="card bg-secondary text-white">
-                    <div class="card-body text-center">
-                        <p>No Events Available</p>
-                    </div>
+            events_html += f"""
+                <div style='margin-bottom: 10px; color: white; font-size: 14px;'>
+                    <strong>{round_name}</strong><br>
+                    Start: {start_time}<br>
+                    End: {end_time}
                 </div>
-            """, unsafe_allow_html=True)
+            """
 
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown("</div></div>", unsafe_allow_html=True)
-
+        # Scrollable container with fixed height
+        html(f"""
+            <div style='background-color: #1F1F2F; border-radius: 8px; padding: 10px; height: 200px; overflow-y: auto;'>  
+              {events_html}
+            </div>
+        """, height=250, scrolling=False)
+    else:
+        st.write("No Events Available")

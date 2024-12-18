@@ -27,18 +27,13 @@ render_navbar()
 if "region_time" not in st.session_state:
     st.session_state["region_time"] = False
 
-
-# Estado para mostrar UTC o Region Time
-if "region_time" not in st.session_state:
-    st.session_state["region_time"] = False
-
 # Selector de Torneos
 selected_tournament = render_tournament_selector(filtered_events)
 
 # Botones Toggle
 show_region_time = render_toggle_buttons()
 
-# Filter events for selected tournament
+# Filtrar eventos para el torneo seleccionado
 selected_events = [event for event in filtered_events if selected_tournament in event["eventId"]]
 
 # Mostrar eventos
