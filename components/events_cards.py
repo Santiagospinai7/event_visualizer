@@ -145,7 +145,7 @@ def render_region_card(region, events_by_region, show_region_time):
                 <!-- Header Section -->
                 <div style='background-color: #2E2E38; border-radius: 8px; margin-bottom:10px; padding-top: 10px; padding-bottom: 10px; margin-left: 50px; margin-right: 50px;'>
                     <img src="{region_icon}" width="50" style="display: block; margin: 0 auto;">
-                    <div style='color: #FFFFFF; font-size: 1.2em; font-weight: bold; margin-top: 0px;'>{region_name}</div>
+                    <div style='color: #FFFFFF; font-size: 1.2em; font-weight: bold; margin-top: 0px;'>{region_name} ({len(events_by_region[region_name])})</div>
                 </div>
                 <!-- Scrollable Content -->
                 <div style=' border-radius: 8px; padding: 10px; height: 180px; overflow-y: auto;'>
