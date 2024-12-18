@@ -18,7 +18,7 @@ filtered_events = [
     and not any(excluded in event['eventId'] for excluded in excluded_events)
 ]
 
-# generate a JSON with the filtered events data
+# generate a JSON with the filtered events data and if exists a file with the same name, it will be overwritten
 with open("filtered_events.json", "w") as file:
     json.dump(filtered_events, file)
 
