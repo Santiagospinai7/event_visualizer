@@ -1,8 +1,10 @@
 import sys
 import os
-from utils.time_utils import convert_time_to_region
 
-sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+# Add the root directory of the project to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from utils.time_utils import convert_time_to_region
 
 data = [
     {"region": "NAW", "original": "2025-07-01T06:00:00Z", "converted_expected": "2025-06-30 23:00:00", "diff": "UTC-7 (Summer)"},
