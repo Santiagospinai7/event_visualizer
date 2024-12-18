@@ -1,8 +1,8 @@
+import re
 import json
 import streamlit as st
-# import pandas as pd
-# from pytz import timezone
-# from datetime import datetime
+from pytz import timezone
+from datetime import datetime
 
 # Load JSON data
 with open("response.json", "r") as file:
@@ -18,34 +18,81 @@ filtered_events = [
     and not any(excluded in event['eventId'] for excluded in excluded_events)
 ]
 
-# generate a JSON with the filtered events data and if exists a file with the same name, it will be overwritten
-with open("filtered_events.json", "w") as file:
-    json.dump(filtered_events, file)
+# Extract unique tournament names
+tournament_names = list(set(re.sub(r"epicgames_S33_", "", event["eventId"]).rsplit("_", 1)[0]
+                            for event in filtered_events))
 
-grouped_events = {}
-for event in filtered_events:
-    event_group = event.get('eventGroup', 'No Group')  # Default to 'No Group' if eventGroup not found
-    if event_group not in grouped_events:
-        grouped_events[event_group] = []
-    grouped_events[event_group].append(event)
+# Streamlit App Title
+st.title("Event Windows Visualizer")
 
-# Add Streamlit title and dropdown
-st.title("Event Group Viewer")
+# Tournament Dropdown
+selected_tournament = st.selectbox("Select Tournament", tournament_names)
 
-# Create dropdown for event groups
-selected_group = st.selectbox(
-    "Select an Event Group",
-    options=list(grouped_events.keys())
-)
+# Toggle for UTC/Region Time
+show_region_time = st.checkbox("Show Region Time Instead of UTC", value=False)
 
-# Display the events for selected group
-if selected_group:
-    st.subheader(f"Events in {selected_group}")
-    for event in grouped_events[selected_group]:
-        # Create an expander for each event
-        with st.expander(f"Event ID: {event['eventId']}"):
-            # Pretty print the JSON
-            st.json(event)
+# Time Conversion Function
+def convert_time_to_region(utc_time, region):
+    region_mapping = {
+        "ASIA": "Asia/Tokyo", "BR": "America/Sao_Paulo",
+        "EU": "Europe/Berlin", "ME": "Asia/Dubai",
+        "NAC": "America/New_York", "NAW": "America/Los_Angeles",
+        "OCE": "Australia/Sydney"
+    }
+    try:
+        utc_dt = datetime.strptime(utc_time, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone("UTC"))
+        return utc_dt.astimezone(timezone(region_mapping.get(region, "UTC"))).strftime("%Y-%m-%d %H:%M:%S")
+    except Exception:
+        return "Invalid Time"
+    
+def parse_event_id(event_id):
+    parts = event_id.split("_")  # Separar por "_"
+    
+    # Identificar las partes
+    season = parts[0]  # Primera parte: "S33"
+    region = parts[-1]  # Última parte: "BR", "EU", etc.
+    event_window = parts[-2]  # Penúltima parte: "Week1Day1"
+    
+    # Todo lo que queda entre el season y el event_window es el nombre del torneo
+    tournament = "_".join(parts[1:-2])  # Unir todo lo intermedio
+    
+    return {
+        "season": season,
+        "tournament": tournament,
+        "event_window": event_window,
+        "region": region
+    }
 
+# Filter events for selected tournament
+selected_events = [event for event in filtered_events if selected_tournament in event["eventId"]]
 
-## Por Grupo de evento visualizar las regiones y los horarios de las ventanas de los eventos. 
+# Group events by region
+events_by_region = {}
+for event in selected_events:
+    for region in event.get("regions", []):
+        if region not in events_by_region:
+            events_by_region[region] = []
+        events_by_region[region].extend(event.get("eventWindows", []))
+
+# Create Grid Layout for Regions
+region_list = ["ASIA", "BR", "EU", "ME", "NAC", "NAW", "OCE"]
+cols = st.columns(7)
+
+# Populate Each Column with Region Data
+for i, region in enumerate(region_list):
+    with cols[i]:
+        st.subheader(region)
+        if region in events_by_region and events_by_region[region]:
+            for window in events_by_region[region]:
+                parsed_events = [parse_event_id(window["eventWindowId"]) for event in filtered_events]
+                round_name = parsed_events[0]["event_window"]
+                start_time = window['beginTime']
+                end_time = window['endTime']
+                if show_region_time:
+                    start_time = convert_time_to_region(window['beginTime'], region)
+                    end_time = convert_time_to_region(window['endTime'], region)
+                st.write(f"**Round:** {round_name}")
+                st.write(f"Start: {start_time}")
+                st.write(f"End: {end_time}")
+        else:
+            st.write("No Events Available")
