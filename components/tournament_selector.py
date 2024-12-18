@@ -6,10 +6,6 @@ def render_tournament_selector(filtered_events):
     tournament_names = list(set(re.sub(r"epicgames_S33_", "", event["eventId"]).rsplit("_", 1)[0]
                                 for event in filtered_events))
 
-    # Estado para mostrar UTC o Region Time
-    if "region_time" not in st.session_state:
-        st.session_state["region_time"] = False
-
     # CSS para el contenedor combinado
     st.markdown("""
         <style>
@@ -69,7 +65,7 @@ def render_tournament_selector(filtered_events):
     # Actualizar estado usando query params
     query_params = st.query_params
     if "region_time" in query_params:
-        st.session_state["region_time"] = query_params["region_time"] == "false"
+        st.session_state["region_time"] = not query_params["region_time"] == "false"
 
     # Mostrar el torneo seleccionado y el modo de tiempo
     selected_tournament = st.selectbox("", ["Choose Tournament"] + tournament_names, index=0)
