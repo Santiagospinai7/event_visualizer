@@ -12,8 +12,14 @@ def parse_event_id(event_id):
     }
 
 # Función principal para mostrar cartas de eventos
-def render_events(events_by_region, show_region_time):
+def render_events(selected_events, show_region_time):
     region_list = ["ASIA", "BR", "EU", "ME", "NAC", "NAW", "OCE"]
+    events_by_region = {}
+    for event in selected_events:
+        for region in event.get("regions", []):
+            if region not in events_by_region:
+                events_by_region[region] = []
+            events_by_region[region].extend(event.get("eventWindows", []))
 
     # Mostrar contenedor
     st.markdown("<div class='container'><div class='row'>", unsafe_allow_html=True)
@@ -60,3 +66,4 @@ def render_events(events_by_region, show_region_time):
         st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("</div></div>", unsafe_allow_html=True)
+
