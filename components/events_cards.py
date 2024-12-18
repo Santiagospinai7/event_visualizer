@@ -104,8 +104,14 @@ def render_region_card(region, events_by_region, show_region_time):
             end_time = window.get("endTime", "N/A")
 
             # Convert times
+            # Convert times
             start_time = convert_time_to_region(begin_time, region_name) if show_region_time else begin_time
             end_time = convert_time_to_region(end_time, region_name) if show_region_time else end_time
+
+            if show_region_time:
+              print('region:', region_name)
+              print('original:', begin_time, 'converted:', start_time)
+              print('original:', end_time, 'converted:', end_time)
 
             events_html += f"""
               <div style='

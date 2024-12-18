@@ -1,7 +1,17 @@
-from datetime import datetime
-import pytz
+import pendulum
 
 def convert_time_to_region(utc_time, region):
+    """
+    Convert UTC time to the target region's local time using Pendulum.
+
+    Args:
+        utc_time (str): Time in UTC format (e.g., "2024-12-11T09:00:00Z").
+        region (str): Target region for conversion.
+
+    Returns:
+        str: Formatted local time for the region, or 'Invalid Time' on failure.
+    """
+    # Region to timezone mapping
     region_mapping = {
         "ASIA": "Asia/Tokyo", 
         "BR": "America/Sao_Paulo",
@@ -11,17 +21,19 @@ def convert_time_to_region(utc_time, region):
         "NAW": "America/Los_Angeles",
         "OCE": "Australia/Sydney"
     }
+
     try:
-        # Validar formato de tiempo
-        if not utc_time:
-            return "Invalid Time"
+        # Parse UTC time using Pendulum
+        utc_dt = pendulum.parse(utc_time, tz="UTC")
         
-        # Parsear el tiempo UTC
-        utc_dt = datetime.strptime(utc_time, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.UTC)
+        # Fetch target timezone
+        target_timezone = region_mapping.get(region, "UTC")
         
-        # Convertir a la zona horaria de la región
-        target_timezone = pytz.timezone(region_mapping.get(region, "UTC"))
-        return utc_dt.astimezone(target_timezone).strftime("%Y-%m-%d %H:%M:%S")
+        # Convert UTC to target timezone
+        local_dt = utc_dt.in_timezone(target_timezone)
+        
+        # Return formatted time
+        return local_dt.format("YYYY-MM-DD HH:mm:ss")
     
-    except (ValueError, KeyError):
+    except Exception:
         return "Invalid Time"
